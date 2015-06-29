@@ -3,7 +3,7 @@
 % Step 1: We load the image
 % Note: Slightly rotated text is ok. More than slightly isn't
 
-colorImage = imread('/home/dario/Downloads/test8.jpg');
+colorImage = imread('/home/dario/Downloads/lab_2.jpg');
 figure; imshow(colorImage); title('Original image')
 
 % The MSER algorithm has been used in text detection by Chen by combining 
@@ -119,7 +119,7 @@ for i = 1:connComp.NumObjects
 end
 
 % Visualize the effect of stroke width filtering
-figure; imshowpair(regionFilteredTextMask, afterStrokeWidthTextMask,'montage');
+figure; imshowpair(edgeEnhancedMSERMask, afterStrokeWidthTextMask,'montage');
 title('Text candidates before and after stroke width filtering')
 
 % Step 11: Determine Bounding Boxes Enclosing Text Regions
