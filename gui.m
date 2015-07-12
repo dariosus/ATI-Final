@@ -22,7 +22,7 @@ function varargout = gui(varargin)
 
 % Edit the above text to modify the response to help gui
 
-% Last Modified by GUIDE v2.5 29-Jun-2015 17:38:26
+% Last Modified by GUIDE v2.5 12-Jul-2015 19:35:20
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -196,9 +196,9 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
 regionFilteredTextMask = edgeEnhancedMSERMask;
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > .995})) = 0;
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 150 | [stats.Area] > 2000})) = 0;
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < .4})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
 figure; imshowpair(edgeEnhancedMSERMask, regionFilteredTextMask, 'montage');
 title('Text candidates before and after region filtering')
 
@@ -220,8 +220,20 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 [~, gDir] = imgradient(grayImage);
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
+
 figure; imshow(strokeWidthImage);
 caxis([0 max(max(strokeWidthImage))]); axis image, colormap('jet'), colorbar;
 title('Visualization of text candidates stroke width')
@@ -244,10 +256,23 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 [~, gDir] = imgradient(grayImage);
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
-connComp = bwconncomp(edgeEnhancedMSERMask);
-afterStrokeWidthTextMask = edgeEnhancedMSERMask;
+
+connComp = bwconncomp(regionFilteredTextMask);
+afterStrokeWidthTextMask = regionFilteredTextMask;
+
 for i = 1:connComp.NumObjects
     strokewidths = strokeWidthImage(connComp.PixelIdxList{i});
     % Compute normalized stroke width variation and compare to common value
@@ -276,10 +301,23 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 [~, gDir] = imgradient(grayImage);
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
-connComp = bwconncomp(edgeEnhancedMSERMask);
-afterStrokeWidthTextMask = edgeEnhancedMSERMask;
+
+connComp = bwconncomp(regionFilteredTextMask);
+afterStrokeWidthTextMask = regionFilteredTextMask;
+
 for i = 1:connComp.NumObjects
     strokewidths = strokeWidthImage(connComp.PixelIdxList{i});
     % Compute normalized stroke width variation and compare to common value
@@ -314,10 +352,23 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 [~, gDir] = imgradient(grayImage);
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
-connComp = bwconncomp(edgeEnhancedMSERMask);
-afterStrokeWidthTextMask = edgeEnhancedMSERMask;
+
+connComp = bwconncomp(regionFilteredTextMask);
+afterStrokeWidthTextMask = regionFilteredTextMask;
+
 for i = 1:connComp.NumObjects
     strokewidths = strokeWidthImage(connComp.PixelIdxList{i});
     % Compute normalized stroke width variation and compare to common value
@@ -361,10 +412,23 @@ edgeAndMSERIntersection = edgeMask & mserMask;
 [~, gDir] = imgradient(grayImage);
 gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
 edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
-connComp = bwconncomp(edgeEnhancedMSERMask);
-afterStrokeWidthTextMask = edgeEnhancedMSERMask;
+
+connComp = bwconncomp(regionFilteredTextMask);
+afterStrokeWidthTextMask = regionFilteredTextMask;
+
 for i = 1:connComp.NumObjects
     strokewidths = strokeWidthImage(connComp.PixelIdxList{i});
     % Compute normalized stroke width variation and compare to common value
@@ -387,7 +451,7 @@ ocrtxt = ocr(afterStrokeWidthTextMask, boxes); % use the binary image instead of
 set(handles.text2,'String',strcat('Final Text: ',ocrtxt.Text));
 
 
-% --- Executes on key press with focus on edit1 and none of its controls.
+% --- Execu qtes on key press with focus on edit1 and none of its controls.
 function edit1_KeyPressFcn(hObject, eventdata, handles)
 % hObject    handle to edit1 (see GCBO)
 % eventdata  structure with the following fields (see UICONTROL)
@@ -395,3 +459,34 @@ function edit1_KeyPressFcn(hObject, eventdata, handles)
 %	Character: character interpretation of the key(s) that was pressed
 %	Modifier: name(s) of the modifier key(s) (i.e., control, shift) pressed
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in pushbutton12.
+function pushbutton12_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton12 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+colorImage = imread(handles.file);
+grayImage = rgb2gray(colorImage);
+mserRegions = detectMSERFeatures(grayImage,'RegionAreaRange',[150 2000]);
+mserRegionsPixels = vertcat(cell2mat(mserRegions.PixelList));
+mserMask = false(size(grayImage));
+ind = sub2ind(size(mserMask), mserRegionsPixels(:,2), mserRegionsPixels(:,1));
+mserMask(ind) = true;
+edgeMask = edge(grayImage, 'Canny');
+edgeAndMSERIntersection = edgeMask & mserMask;
+[~, gDir] = imgradient(grayImage);
+gradientGrownEdgesMask = helperGrowEdges(edgeAndMSERIntersection, gDir, 'LightTextOnDark');
+edgeEnhancedMSERMask = ~gradientGrownEdgesMask & mserMask;
+
+connComp = bwconncomp(edgeEnhancedMSERMask); % Find connected components
+stats = regionprops(connComp,'Area','Eccentricity','Solidity');
+
+regionFilteredTextMask = edgeEnhancedMSERMask;
+
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
+figure; imshowpair(edgeEnhancedMSERMask, regionFilteredTextMask, 'montage');
+title('Text candidates before and after region filtering')

@@ -74,9 +74,9 @@ stats = regionprops(connComp,'Area','Eccentricity','Solidity');
 
 regionFilteredTextMask = edgeEnhancedMSERMask;
 
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > .995})) = 0;
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 150 | [stats.Area] > 2000})) = 0;
-regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < .4})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Eccentricity] > 0.995})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Area] < 0 | [stats.Area] > 2000})) = 0;
+regionFilteredTextMask(vertcat(connComp.PixelIdxList{[stats.Solidity] < 0.2})) = 0;
 
 % Visualize results of filtering
 figure; imshowpair(edgeEnhancedMSERMask, regionFilteredTextMask, 'montage');
@@ -91,8 +91,8 @@ title('Text candidates before and after region filtering')
 % too much variation . The stroke width image below is computed using the 
 % helperStrokeWidth helper function.
 
-%distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
-distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
+distanceImage    = bwdist(~regionFilteredTextMask);  % Compute distance transform
+%distanceImage    = bwdist(~edgeEnhancedMSERMask);  % Compute distance transform
 strokeWidthImage = helperStrokeWidth(distanceImage); % Compute stroke width image
 
 % Show stroke width image
@@ -105,11 +105,11 @@ title('Visualization of text candidates stroke width')
 % Note that most non-text regions show a large variation in stroke width. 
 % These can now be filtered using the coefficient of stroke width variation.
 
-%connComp = bwconncomp(regionFilteredTextMask);
-%afterStrokeWidthTextMask = regionFilteredTextMask;
+connComp = bwconncomp(regionFilteredTextMask);
+afterStrokeWidthTextMask = regionFilteredTextMask;
 
-connComp = bwconncomp(edgeEnhancedMSERMask);
-afterStrokeWidthTextMask = edgeEnhancedMSERMask;
+%connComp = bwconncomp(edgeEnhancedMSERMask);
+%afterStrokeWidthTextMask = edgeEnhancedMSERMask;
 for i = 1:connComp.NumObjects
     strokewidths = strokeWidthImage(connComp.PixelIdxList{i});
     % Compute normalized stroke width variation and compare to common value
